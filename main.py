@@ -3,6 +3,7 @@ from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
+import random
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -88,6 +89,36 @@ async def secret_error(ctx, error):
 async def ping(interaction: discord.Interaction):
     await interaction.response.send_message("Pong from funBot!")
 
+@bot.tree.command(name="winpick", description="Randomly pick red or black")
+async def pick(interaction: discord.Interaction):
+    color = random.choice(["🔴 Red", "⚫ Black"])
+    await interaction.response.send_message(f"🎯 Fkkk u got **{color}**!")
+
+
+@bot.tree.command(name="blackjack", description="Get advice on whether to hit or stand")
+@discord.app_commands.describe(
+    dealer="Dealer's visible card (2–11, where 11 = Ace)",
+    player="Your total hand value"
+)
+async def blackjack(interaction: discord.Interaction, dealer: int, player: int):
+    # Basic strategy logic
+    advice = ""
+
+    if player >= 17:
+        advice = "✅ Stand — you're high enough!"
+    elif player <= 11:
+        advice = "🃏 Hit — you can't bust yet!"
+    elif 12 <= player <= 16:
+        if dealer >= 7:
+            advice = "🔥 Hit — dealer might beat you!"
+        else:
+            advice = "🛑 Stand — let the dealer bust!"
+    else:
+        advice = "🤔 Hmm... tricky. Play it safe."
+
+    await interaction.response.send_message(
+        f"Dealer has {dealer}, you have {player} → **{advice}**"
+    )
 
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
