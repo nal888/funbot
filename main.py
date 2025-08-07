@@ -18,7 +18,9 @@ secret_role = "Gamer"
 
 @bot.event
 async def on_ready():
-    print(f"We are ready to go in, {bot.user.name}")
+    await bot.tree.sync()
+    print(f"Bot is ready as {bot.user}")
+
 
 @bot.event
 async def on_member_join(member):
@@ -81,5 +83,11 @@ async def secret(ctx):
 async def secret_error(ctx, error):
     if isinstance(error, commands.MissingRole):
         await ctx.send("You do not have permission to do that!")
+
+@bot.tree.command(name="pingfun", description="Check if the bot is alive")
+async def ping(interaction: discord.Interaction):
+    await interaction.response.send_message("Pong from funBot!")
+
+
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
