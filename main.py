@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import app_commands 
 import logging
 from dotenv import load_dotenv
 import os
@@ -19,8 +20,10 @@ secret_role = "Gamer"
 
 @bot.event
 async def on_ready():
+    # Sync and clear global commands to prevent duplicates
     await bot.tree.sync()
-    print(f"Bot is ready as {bot.user}")
+
+    print(f"✅ Logged in as {bot.user} and synced slash commands.")
 
 
 @bot.event
@@ -85,24 +88,27 @@ async def secret_error(ctx, error):
     if isinstance(error, commands.MissingRole):
         await ctx.send("You do not have permission to do that!")
 
-@bot.tree.command(name="pingfun", description="Check if the bot is alive")
-async def ping(interaction: discord.Interaction):
-    await interaction.response.send_message("Pong from funBot!")
+# Remove old pingfun if it exists
+bot.tree.remove_command("pingfun", type=discord.AppCommandType.chat_input)
 
-@bot.tree.command(name="winpick", description="Randomly pick red or black")
-async def pick(interaction: discord.Interaction):
+# ✅ New updated /pingfun
+@bot.tree.command(name="pingggg", description="🎯 Test if the bot is alive")
+async def pingfun(interaction: discord.Interaction):
     color = random.choice(["🔴 Red", "⚫ Black"])
-    await interaction.response.send_message(f"🎯 Fkkk u got **{color}**!")
+    await interaction.response.send_message(f"You rolled the dice... it's **{color}**")
 
 
+
+# ✅ SLASH COMMAND: /blackjack
 @bot.tree.command(name="blackjack", description="Get advice on whether to hit or stand")
-@discord.app_commands.describe(
+@app_commands.describe(
     dealer="Dealer's visible card (2–11, where 11 = Ace)",
     player="Your total hand value"
 )
 async def blackjack(interaction: discord.Interaction, dealer: int, player: int):
-    # Basic strategy logic
-    advice = ""
+    if dealer < 2 or dealer > 11 or player < 2 or player > 21:
+        await interaction.response.send_message("Please use values: dealer=2–11, player=2–21")
+        return
 
     if player >= 17:
         advice = "✅ Stand — you're high enough!"
@@ -119,6 +125,5 @@ async def blackjack(interaction: discord.Interaction, dealer: int, player: int):
     await interaction.response.send_message(
         f"Dealer has {dealer}, you have {player} → **{advice}**"
     )
-
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
